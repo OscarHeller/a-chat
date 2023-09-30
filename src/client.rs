@@ -10,12 +10,15 @@ use async_std::{
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub(crate) fn main() -> Result<()> {
-    task::block_on(try_main("127.0.0.1:8080"))
+pub(crate) fn main(ip: impl ToSocketAddrs) -> Result<()> {
+    task::block_on(try_main(ip))
 }
 
 async fn try_main(addr: impl ToSocketAddrs) -> Result<()> {
     let stream = TcpStream::connect(addr).await?;
+
+    println!("Welcome to a-chat!\n\nThe first message you send will be your username.\n\nTo send a message, type a username or comma-separated list of usernames,\nfollowed by a colon and space, e.g. 'friend: how are you?', or \n'friend,enemy: 'what is up?'");
+
     let (reader, mut writer) = (&stream, &stream);
     let reader = BufReader::new(reader);
     let mut lines_from_server = futures::StreamExt::fuse(reader.lines());
